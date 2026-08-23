@@ -11,21 +11,35 @@ async function bootstrap() {
     new ValidationPipe({
       whitelist: true,
       transform: true,
-    })
+    }),
   );
 
   app.use(cookieParser());
 
+  // Allow both localhost and your deployed Vercel frontend
+  const allowedOrigins = [
+    'http://localhost:5173',
+    process.env.FRONTEND_URL, // e.g. https://your-app.vercel.app
+  ].filter(Boolean) as string[];
+
   app.enableCors({
-    origin: 'http://localhost:5173',
+    origin: (origin, callback) => {
+      // Allow requests with no origin (like mobile apps, curl, server-to-server) or matching origins
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error('Not allowed by CORS'));
+      }
+    },
     credentials: true,
   });
 
-  app.useGlobalFilters(
-    new HttpExceptionFilter(),
-  );
+  app.useGlobalFilters(new HttpExceptionFilter());
 
-  console.log(`Server is running on port ${process.env.PORT ?? 3000}`);
-  await app.listen(process.env.PORT ?? 3000);
+  const port = process.env.PORT ?? 3000;
+  
+  // Render requires listening on '0.0.0.0'
+  await app.listen(port, '0.0.0.0');
+  console.log(`Server is running on port ${port}`);
 }
 bootstrap();
