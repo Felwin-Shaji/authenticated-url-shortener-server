@@ -4,7 +4,7 @@ import { RegisterDto } from './dto/register.dto';
 import * as bcrypt from 'bcrypt';
 import { LoginDto } from './dto/login.dto';
 import { JwtService, JwtSignOptions } from '@nestjs/jwt';
-import type { Response, Request } from 'express';
+import type { Response, Request, CookieOptions } from 'express';
 
 @Injectable()
 export class AuthService {
@@ -12,6 +12,16 @@ export class AuthService {
         private readonly usersService: UsersService,
         private readonly jwtService: JwtService
     ) { }
+
+    private getCookieOptions(): CookieOptions {
+        const isProduction = process.env.NODE_ENV === 'production';
+        return {
+            httpOnly: true,
+            secure: isProduction, // Required if sameSite is 'none'
+            sameSite: isProduction ? 'none' : 'lax', // 'none' enables cross-origin (Vercel -> Render)
+            maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+        };
+    }
 
     async register(registerDto: RegisterDto, response: Response) {
         const { username, email, password } = registerDto;
@@ -33,12 +43,7 @@ export class AuthService {
         const accessToken = await this.generateAccessToken(user._id.toString(), user.username);
         const refreshToken = await this.generateRefreshToken(user._id.toString());
 
-        response.cookie('refreshToken', refreshToken, {
-            httpOnly: true,
-            secure: process.env.NODE_ENV === 'production',
-            sameSite: 'strict',
-            maxAge: 7 * 24 * 60 * 60 * 1000,
-        });
+        response.cookie('refreshToken', refreshToken, this.getCookieOptions());
 
         return {
             accessToken,
@@ -65,12 +70,7 @@ export class AuthService {
         const accessToken = await this.generateAccessToken(user._id.toString(), user.username);
         const refreshToken = await this.generateRefreshToken(user._id.toString());
 
-        response.cookie('refreshToken', refreshToken, {
-            httpOnly: true,
-            secure: process.env.NODE_ENV === 'production',
-            sameSite: 'strict',
-            maxAge: 7 * 24 * 60 * 60 * 1000,
-        });
+        response.cookie('refreshToken', refreshToken, this.getCookieOptions());
 
         return {
             accessToken,
