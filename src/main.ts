@@ -10,13 +10,13 @@ async function bootstrap() {
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true,
+      forbidNonWhitelisted: true,
       transform: true,
-    }),
+    })
   );
 
   app.use(cookieParser());
 
-  // Allow both localhost and your deployed Vercel frontend
   const allowedOrigins = [
     'http://localhost:5173',
     process.env.FRONTEND_URL, // e.g. https://your-app.vercel.app
@@ -24,7 +24,6 @@ async function bootstrap() {
 
   app.enableCors({
     origin: (origin, callback) => {
-      // Allow requests with no origin (like mobile apps, curl, server-to-server) or matching origins
       if (!origin || allowedOrigins.includes(origin)) {
         callback(null, true);
       } else {
@@ -37,7 +36,7 @@ async function bootstrap() {
   app.useGlobalFilters(new HttpExceptionFilter());
 
   const port = process.env.PORT ?? 3000;
-  
+
   // Render requires listening on '0.0.0.0'
   await app.listen(port, '0.0.0.0');
   console.log(`Server is running on port ${port}`);

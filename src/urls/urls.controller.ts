@@ -1,8 +1,8 @@
 import { Body, Controller, Get, Param, Post, Query, Req, Res, UseGuards } from '@nestjs/common';
 import { UrlsService } from './urls.service';
-import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { CreateUrlDto, PaginationQueryDto } from './dto/create-url.dto';
-import { type AuthenticatedRequest } from 'src/auth/interfaces/authenticated-request.interface';
+import { type AuthenticatedRequest } from '../auth/interfaces/authenticated-request.interface';
 import type { Response } from 'express';
 
 @Controller('urls')
@@ -13,13 +13,21 @@ export class UrlsController {
 
     @Post()
     @UseGuards(JwtAuthGuard)
-    createUrl(
+    async createUrl(
         @Body() createUrlDto: CreateUrlDto,
-        @Req() request: AuthenticatedRequest
+        @Req() request: AuthenticatedRequest,
     ) {
-        console.log('Authenticated user:', request.user);
-        return this.urlsService.create(request.user.sub, createUrlDto);
-    };
+        const data = await this.urlsService.create(
+            request.user.sub,
+            createUrlDto,
+        );
+
+        return {
+            success: true,
+            message: 'URL created successfully',
+            data,
+        };
+    }
 
     @Get()
     @UseGuards(JwtAuthGuard)
@@ -27,7 +35,17 @@ export class UrlsController {
         @Req() request: AuthenticatedRequest,
         @Query() paginationQuery: PaginationQueryDto,
     ) {
-        return this.urlsService.findAll(request.user.sub, paginationQuery);
+        const result = await this.urlsService.findAll(
+            request.user.sub,
+            paginationQuery,
+        );
+
+        return {
+            success: true,
+            message: 'URLs fetched successfully',
+            data: result.data,
+            meta: result.meta,
+        };
     }
 
     @Get(':shortCode')

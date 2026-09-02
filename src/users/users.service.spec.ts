@@ -1,8 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { getModelToken } from '@nestjs/mongoose';
-
 import { UsersService } from './users.service';
-import { User } from './schemas/user.schema';
+import { USER_REPOSITORY } from './interfaces/user.repository.token';
 
 describe('UsersService', () => {
   let service: UsersService;
@@ -12,8 +10,13 @@ describe('UsersService', () => {
       providers: [
         UsersService,
         {
-          provide: getModelToken(User.name),
-          useValue: {},
+          provide: USER_REPOSITORY,
+          useValue: {
+            findByEmail: jest.fn(),
+            findById: jest.fn(),
+            findByUsername: jest.fn(),
+            createUser: jest.fn(),
+          },
         },
       ],
     }).compile();

@@ -1,15 +1,15 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
-import { InjectModel } from '@nestjs/mongoose';
-import { Url, UrlDocument } from './schemas/url.schema';
-import { Model } from 'mongoose';
+import { Injectable, Inject, NotFoundException } from '@nestjs/common';
 import { CreateUrlDto, PaginationQueryDto } from './dto/create-url.dto';
 import { randomBytes } from 'crypto';
+import { URL_REPOSITORY } from './interfaces/url.repository.token';
+import type { IUrlRepository } from './interfaces/url.repository.interface';
+import { UrlMapper } from './mapper/urls.mapper';
 
 @Injectable()
 export class UrlsService {
     constructor(
-        @InjectModel(Url.name)
-        private readonly urlModel: Model<UrlDocument>
+        @Inject(URL_REPOSITORY)
+        private readonly _urlRepository: IUrlRepository,
     ) { }
 
     async create(
@@ -18,23 +18,15 @@ export class UrlsService {
     ) {
         const shortCode = randomBytes(4).toString('hex');
 
-        const url = await this.urlModel.create({
+        const url = await this._urlRepository.create({
             userId,
             originalUrl: createUrlDto.originalUrl,
             shortCode,
-            clicks: 0,
-            isActive: true,
         });
 
-        const baseUrl = process.env.APP_BASE_URL;
+            const baseUrl = process.env.APP_BASE_URL!.replace(/\/$/, '');
 
-        return {
-            id: url._id,
-            originalUrl: url.originalUrl,
-            shortCode: url.shortCode,
-            shortUrl: `${baseUrl}/urls/${url.shortCode}`,
-            clicks: url.clicks,
-        };
+        return UrlMapper.toDto(url, baseUrl);
     }
 
     async findAll(userId: string, paginationQuery: PaginationQueryDto) {
@@ -42,26 +34,18 @@ export class UrlsService {
         const skip = (page - 1) * limit;
 
         const [urls, totalItems] = await Promise.all([
-            this.urlModel
-                .find({ userId })
-                .sort({ createdAt: -1 })
-                .skip(skip)
-                .limit(limit)
-                .lean(),
-            this.urlModel.countDocuments({ userId }),
+            this._urlRepository.findAllByUser(
+                userId,
+                skip,
+                limit,
+            ),
+
+            this._urlRepository.countByUser(userId),
         ]);
 
-        const baseUrl = process.env.APP_BASE_URL?.replace(/\/$/, '');
+        const baseUrl = process.env.APP_BASE_URL!.replace(/\/$/, '');
 
-        const data = urls.map((url) => ({
-            id: url._id,
-            originalUrl: url.originalUrl,
-            shortCode: url.shortCode,
-            shortUrl: `${baseUrl}/urls/${url.shortCode}`,
-            clicks: url.clicks,
-            isActive: url.isActive,
-            createdAt: url.createdAt,
-        }));
+        const data = urls.map((url) => UrlMapper.toDto(url, baseUrl));
 
         const totalPages = Math.ceil(totalItems / limit);
 
@@ -80,13 +64,11 @@ export class UrlsService {
     }
     async redirect(shortCode: string): Promise<string> {
 
-        const url = await this.urlModel.findOne({
+        const url = await this._urlRepository.findActiveByShortCode(
             shortCode,
-            isActive: true,
-        });
+        );
 
         if (!url) throw new NotFoundException('Short URL not found');
-
 
         if (
             url.expiresAt &&
@@ -95,15 +77,9 @@ export class UrlsService {
             throw new NotFoundException('Short URL has expired',);
         }
 
-        await this.urlModel.updateOne(
-            { _id: url._id },
-            {
-                $inc: {
-                    clicks: 1,
-                },
-            },
+        await this._urlRepository.incrementClicks(
+            url._id.toString(),
         );
-
         return url.originalUrl;
     }
 }
