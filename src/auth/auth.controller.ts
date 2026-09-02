@@ -9,37 +9,68 @@ import type { Response, Request } from 'express';
 export class AuthController {
     constructor(private readonly authService: AuthService) { };
 
-    @Post("register")
+    @Post('register')
     @HttpCode(201)
-    register(
+    async register(
         @Body() registerDto: RegisterDto,
-        @Res({ passthrough: true }) response: Response
+        @Res({ passthrough: true }) response: Response,
     ) {
-        return this.authService.register(registerDto, response)
-    };
+        const data = await this.authService.register(
+            registerDto,
+            response,
+        );
 
-    @Post("login")
-    login(
+        return {
+            success: true,
+            message: 'Registration successful',
+            data,
+        };
+    }
+
+    @Post('login')
+    async login(
         @Body() loginDto: LoginDto,
-        @Res({ passthrough: true }) response: Response
+        @Res({ passthrough: true }) response: Response,
     ) {
-        return this.authService.login(loginDto, response);
-    };
+        const data = await this.authService.login(
+            loginDto,
+            response,
+        );
+
+        return {
+            success: true,
+            message: 'Login successful',
+            data,
+        };
+    }
 
     @Post('refresh')
     async refresh(
         @Req() request: Request,
-        @Res({ passthrough: true }) response: Response
+        @Res({ passthrough: true }) response: Response,
     ) {
-        return this.authService.refresh(request, response);
-    };
+        const data = await this.authService.refresh(
+            request,
+            response,
+        );
+
+        console.log('Refresh token response:', data);
+
+        return {
+            success: true,
+            message: 'Token refreshed successfully',
+            data,
+        };
+    }
 
     @Post('logout')
     logout(@Res({ passthrough: true }) response: Response) {
         response.clearCookie('refreshToken');
 
         return {
+            success: true,
             message: 'Logged out successfully',
+            data: null,
         };
     }
 }
