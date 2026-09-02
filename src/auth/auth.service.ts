@@ -5,6 +5,7 @@ import * as bcrypt from 'bcrypt';
 import { LoginDto } from './dto/login.dto';
 import { JwtService, JwtSignOptions } from '@nestjs/jwt';
 import type { Response, Request, CookieOptions } from 'express';
+import { UserMapper } from '../users/mapper/user.mapper';
 
 @Injectable()
 export class AuthService {
@@ -47,11 +48,7 @@ export class AuthService {
 
         return {
             accessToken,
-            user: {
-                id: user._id,
-                username: user.username,
-                email: user.email,
-            },
+            user: UserMapper.toDto(user),
         };
     };
 
@@ -74,11 +71,7 @@ export class AuthService {
 
         return {
             accessToken,
-            user: {
-                id: user._id,
-                username: user.username,
-                email: user.email,
-            },
+            user: UserMapper.toDto(user),
         };
     };
 
@@ -96,11 +89,7 @@ export class AuthService {
 
         return {
             accessToken,
-            user: {
-                id: user._id,
-                username: user.username,
-                email: user.email,
-            },
+            user: UserMapper.toDto(user),
         };
     }
 
