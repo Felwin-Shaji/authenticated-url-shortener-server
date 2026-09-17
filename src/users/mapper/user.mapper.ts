@@ -1,10 +1,10 @@
 import { UserResponseDto } from '../dto/user-response.dto';
-import { UserDocument } from '../schemas/user.schema';
+import { UserEntity } from '../entities/user.entity';
 
 export class UserMapper {
-    static toDto(user: UserDocument): UserResponseDto {
+    static toDto(user: UserEntity): UserResponseDto {
         return {
-            id: user._id.toString(),
+            id: user.id.toString(),
             username: user.username,
             email: user.email,
         };
