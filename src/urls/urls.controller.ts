@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Post, Query, Req, Res, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Post, Query, Req, Res, UseGuards } from '@nestjs/common';
 import { UrlsService } from './urls.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { CreateUrlDto, PaginationQueryDto } from './dto/create-url.dto';
@@ -59,6 +59,24 @@ export class UrlsController {
             );
 
         return response.redirect(originalUrl);
+    }
+
+    @Delete(':id')
+    @UseGuards(JwtAuthGuard)
+    async remove(
+        @Req() req: AuthenticatedRequest,
+        @Param('id') urlId: string,
+    ) {
+        const userId = req.user.sub;
+
+        await this.urlsService.remove(
+            userId,
+            urlId,
+        );
+
+        return {
+            message: 'URL removed successfully',
+        };
     }
 
 }

@@ -1,22 +1,22 @@
-import type { UserDocument } from '../schemas/user.schema';
+import { UserEntity } from '../entities/user.entity';
 
 export interface IUserRepository {
 
     findByEmail(
         email: string,
-    ): Promise<UserDocument | null>;
+    ): Promise<UserEntity | null>;
 
     findById(
         userId: string,
-    ): Promise<UserDocument | null>;
+    ): Promise<UserEntity | null>;
 
     findByUsername(
         username: string,
-    ): Promise<UserDocument | null>;
+    ): Promise<UserEntity | null>;
 
     createUser(
         username: string,
         email: string,
         hashedPassword: string,
-    ): Promise<UserDocument>;
+    ): Promise<UserEntity>;
 }

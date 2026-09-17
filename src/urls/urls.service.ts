@@ -1,4 +1,4 @@
-import { Injectable, Inject, NotFoundException } from '@nestjs/common';
+import { Injectable, Inject, NotFoundException, ConflictException } from '@nestjs/common';
 import { CreateUrlDto, PaginationQueryDto } from './dto/create-url.dto';
 import { randomBytes } from 'crypto';
 import { URL_REPOSITORY } from './interfaces/url.repository.token';
@@ -16,6 +16,13 @@ export class UrlsService {
         userId: string,
         createUrlDto: CreateUrlDto,
     ) {
+        const existingUrl = await this._urlRepository.findByUserAndOriginalUrl(
+            userId,
+            createUrlDto.originalUrl,
+        );
+
+        if (existingUrl) throw new ConflictException('This URL has already been shortened');
+
         const shortCode = randomBytes(4).toString('hex');
 
         const url = await this._urlRepository.create({
@@ -24,7 +31,7 @@ export class UrlsService {
             shortCode,
         });
 
-            const baseUrl = process.env.APP_BASE_URL!.replace(/\/$/, '');
+        const baseUrl = process.env.APP_BASE_URL!.replace(/\/$/, '');
 
         return UrlMapper.toDto(url, baseUrl);
     }
@@ -78,8 +85,23 @@ export class UrlsService {
         }
 
         await this._urlRepository.incrementClicks(
-            url._id.toString(),
+            url.id.toString(),
         );
         return url.originalUrl;
+    };
+
+    async remove(
+        userId: string,
+        urlId: string,
+    ): Promise<void> {
+
+        const removed = await this._urlRepository.remove(
+            userId,
+            urlId,
+        );
+
+        if (!removed) {
+            throw new NotFoundException('URL not found');
+        }
     }
 }
