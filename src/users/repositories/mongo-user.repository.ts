@@ -6,10 +6,10 @@ import {
     UserDocument,
 } from '../schemas/user.schema';
 import { IUserRepository } from '../interfaces/user.repository.interface';
+import { UserEntity } from '../entities/user.entity';
 
 @Injectable()
-export class MongoUserRepository
-    implements IUserRepository {
+export class MongoUserRepository implements IUserRepository {
 
     constructor(
         @InjectModel(User.name)
@@ -18,43 +18,69 @@ export class MongoUserRepository
 
     async findByEmail(
         email: string,
-    ): Promise<UserDocument | null> {
+    ): Promise<UserEntity | null> {
 
-        return this.userModel
+        const document = await this.userModel
             .findOne({ email })
             .exec();
+
+        return document
+            ? this.toEntity(document)
+            : null;
     }
 
     async findById(
         userId: string,
-    ): Promise<UserDocument | null> {
+    ): Promise<UserEntity | null> {
 
-        return this.userModel
+        const document = await this.userModel
             .findById(userId)
             .exec();
+
+        return document
+            ? this.toEntity(document)
+            : null;
     }
 
     async findByUsername(
         username: string,
-    ): Promise<UserDocument | null> {
+    ): Promise<UserEntity | null> {
 
-        return this.userModel
+        const document = await this.userModel
             .findOne({ username })
             .exec();
+
+        return document
+            ? this.toEntity(document)
+            : null;
     }
 
     async createUser(
         username: string,
         email: string,
         hashedPassword: string,
-    ): Promise<UserDocument> {
+    ): Promise<UserEntity> {
 
-        const user = new this.userModel({
+        const document = await this.userModel.create({
             username,
             email,
             password: hashedPassword,
         });
 
-        return user.save();
+        return this.toEntity(document);
+    }
+
+    private toEntity(
+        document: UserDocument,
+    ): UserEntity {
+
+        return {
+            id: document._id.toString(),
+            username: document.username,
+            email: document.email,
+            password: document.password,
+            createdAt: document.createdAt,
+            updatedAt: document.updatedAt,
+        };
     }
 }

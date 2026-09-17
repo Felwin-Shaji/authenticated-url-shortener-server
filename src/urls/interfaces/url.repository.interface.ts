@@ -1,24 +1,34 @@
-import { UrlDocument } from '../schemas/url.schema';
+import { UrlEntity } from '../entities/url.entity';
 
 export interface IUrlRepository {
-    
+
     create(data: {
         userId: string;
         originalUrl: string;
         shortCode: string;
-    }): Promise<UrlDocument>;
+    }): Promise<UrlEntity>;
 
     findAllByUser(
         userId: string,
         skip: number,
         limit: number,
-    ): Promise<UrlDocument[]>;
+    ): Promise<UrlEntity[]>;
+
+    findByUserAndOriginalUrl(
+        userId: string,
+        originalUrl: string,
+    ): Promise<UrlEntity | null>;
 
     countByUser(userId: string): Promise<number>;
 
     findActiveByShortCode(
         shortCode: string,
-    ): Promise<UrlDocument | null>;
+    ): Promise<UrlEntity | null>;
 
     incrementClicks(id: string): Promise<void>;
+
+    remove(
+        userId: string,
+        urlId: string,
+    ): Promise<boolean>;
 }

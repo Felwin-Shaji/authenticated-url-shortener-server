@@ -41,8 +41,8 @@ export class AuthService {
             hashedPassword,
         );
 
-        const accessToken = await this.generateAccessToken(user._id.toString(), user.username);
-        const refreshToken = await this.generateRefreshToken(user._id.toString());
+        const accessToken = await this.generateAccessToken(user.id.toString(), user.username);
+        const refreshToken = await this.generateRefreshToken(user.id.toString());
 
         response.cookie('refreshToken', refreshToken, this.getCookieOptions());
 
@@ -64,8 +64,8 @@ export class AuthService {
         );
         if (!isPasswordValid) throw new UnauthorizedException("Invalid password");
 
-        const accessToken = await this.generateAccessToken(user._id.toString(), user.username);
-        const refreshToken = await this.generateRefreshToken(user._id.toString());
+        const accessToken = await this.generateAccessToken(user.id.toString(), user.username);
+        const refreshToken = await this.generateRefreshToken(user.id.toString());
 
         response.cookie('refreshToken', refreshToken, this.getCookieOptions());
 
@@ -85,7 +85,7 @@ export class AuthService {
         const user = await this.usersService.findById(payload.sub);
         if (!user) throw new UnauthorizedException('User not found');
 
-        const accessToken = await this.generateAccessToken(user._id.toString(), user.username);
+        const accessToken = await this.generateAccessToken(user.id.toString(), user.username);
 
         return {
             accessToken,
