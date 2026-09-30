@@ -6,6 +6,7 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
 import { UrlsModule } from './urls/urls.module';
+import { APP_SERVICE } from './interfaces/app.service.token';
 
 @Module({
   imports: [
@@ -30,6 +31,6 @@ import { UrlsModule } from './urls/urls.module';
   ],
 
   controllers: [AppController],
-  providers: [AppService],
+  providers: [AppService, { provide: APP_SERVICE, useExisting: AppService }],
 })
 export class AppModule { }

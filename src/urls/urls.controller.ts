@@ -1,5 +1,6 @@
-import { Body, Controller, Delete, Get, Param, Post, Query, Req, Res, UseGuards } from '@nestjs/common';
-import { UrlsService } from './urls.service';
+import { Body, Controller, Delete, Get, Inject, Param, Post, Query, Req, Res, UseGuards } from '@nestjs/common';
+import type { IUrlsService } from './interfaces/urls.service.interface';
+import { URLS_SERVICE } from './interfaces/urls.service.token';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { CreateUrlDto, PaginationQueryDto } from './dto/create-url.dto';
 import { type AuthenticatedRequest } from '../auth/interfaces/authenticated-request.interface';
@@ -8,7 +9,8 @@ import type { Response } from 'express';
 @Controller('urls')
 export class UrlsController {
     constructor(
-        private readonly urlsService: UrlsService
+        @Inject(URLS_SERVICE) 
+        private readonly urlsService: IUrlsService
     ) { }
 
     @Post()

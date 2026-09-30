@@ -6,6 +6,7 @@ import { Url, UrlSchema } from './schemas/url.schema';
 import { AuthModule } from 'src/auth/auth.module';
 import { MongoUrlRepository } from './repositories/mongo-url.repository';
 import { URL_REPOSITORY } from './interfaces/url.repository.token';
+import { URLS_SERVICE } from './interfaces/urls.service.token';
 
 @Module({
   imports: [
@@ -15,11 +16,13 @@ import { URL_REPOSITORY } from './interfaces/url.repository.token';
   controllers: [UrlsController],
   providers: [
     UrlsService,
+    { provide: URLS_SERVICE, useExisting: UrlsService },
     MongoUrlRepository,
     {
       provide: URL_REPOSITORY,
       useExisting: MongoUrlRepository,
     },
-  ]
+  ],
+  exports: [URLS_SERVICE]
 })
 export class UrlsModule { }

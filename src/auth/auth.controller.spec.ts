@@ -1,7 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 
 import { AuthController } from './auth.controller';
-import { AuthService } from './auth.service';
+import { AUTH_SERVICE } from './interfaces/auth.service.token';
 
 describe('AuthController', () => {
   let controller: AuthController;
@@ -11,7 +11,7 @@ describe('AuthController', () => {
       controllers: [AuthController],
       providers: [
         {
-          provide: AuthService,
+          provide: AUTH_SERVICE,
           useValue: {},
         },
       ],
