@@ -1,5 +1,6 @@
-import { Body, Controller, HttpCode, Post, Req, Res } from '@nestjs/common';
-import { AuthService } from './auth.service';
+import { Body, Controller, HttpCode, Inject, Post, Req, Res } from '@nestjs/common';
+import type { IAuthService } from './interfaces/auth.service.interface';
+import { AUTH_SERVICE } from './interfaces/auth.service.token';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
 import type { Response, Request } from 'express';
@@ -7,7 +8,10 @@ import type { Response, Request } from 'express';
 
 @Controller('auth')
 export class AuthController {
-    constructor(private readonly authService: AuthService) { };
+    constructor(
+        @Inject(AUTH_SERVICE)
+        private readonly authService: IAuthService
+    ) { };
 
     @Post('register')
     @HttpCode(201)

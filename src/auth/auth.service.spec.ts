@@ -1,7 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 
 import { AuthService } from './auth.service';
-import { UsersService } from '../users/users.service';
+import { USER_SERVICE } from '../users/interfaces/user.service.token';
 import { JwtService } from '@nestjs/jwt';
 
 describe('AuthService', () => {
@@ -12,7 +12,7 @@ describe('AuthService', () => {
       providers: [
         AuthService,
         {
-          provide: UsersService,
+          provide: USER_SERVICE,
           useValue: {},
         },
         {
