@@ -2,9 +2,10 @@ import { Inject, Injectable } from '@nestjs/common';
 import { USER_REPOSITORY } from './interfaces/user.repository.token';
 import type { IUserRepository } from './interfaces/user.repository.interface';
 import { UserEntity } from './entities/user.entity';
+import type { IUserService } from './interfaces/user.service.interface';
 
 @Injectable()
-export class UsersService {
+export class UsersService implements IUserService {
 
     constructor(
         @Inject(USER_REPOSITORY)

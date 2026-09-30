@@ -4,9 +4,10 @@ import { randomBytes } from 'crypto';
 import { URL_REPOSITORY } from './interfaces/url.repository.token';
 import type { IUrlRepository } from './interfaces/url.repository.interface';
 import { UrlMapper } from './mapper/urls.mapper';
+import type { IUrlsService } from './interfaces/urls.service.interface';
 
 @Injectable()
-export class UrlsService {
+export class UrlsService implements IUrlsService {
     constructor(
         @Inject(URL_REPOSITORY)
         private readonly _urlRepository: IUrlRepository,

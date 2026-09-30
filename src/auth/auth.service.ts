@@ -1,5 +1,7 @@
-import { ConflictException, Injectable, UnauthorizedException } from '@nestjs/common';
-import { UsersService } from '../users/users.service';
+import { ConflictException, Inject, Injectable, UnauthorizedException } from '@nestjs/common';
+import { USER_SERVICE } from '../users/interfaces/user.service.token';
+import type { IUserService } from '../users/interfaces/user.service.interface';
+import type { IAuthService } from './interfaces/auth.service.interface';
 import { RegisterDto } from './dto/register.dto';
 import * as bcrypt from 'bcrypt';
 import { LoginDto } from './dto/login.dto';
@@ -8,9 +10,12 @@ import type { Response, Request, CookieOptions } from 'express';
 import { UserMapper } from '../users/mapper/user.mapper';
 
 @Injectable()
-export class AuthService {
+export class AuthService implements IAuthService {
     constructor(
-        private readonly usersService: UsersService,
+        
+        @Inject(USER_SERVICE) 
+        private readonly usersService: IUserService,
+
         private readonly jwtService: JwtService
     ) { }
 

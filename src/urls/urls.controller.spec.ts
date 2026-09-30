@@ -1,6 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { UrlsController } from './urls.controller';
-import { UrlsService } from './urls.service';
+import { URLS_SERVICE } from './interfaces/urls.service.token';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
@@ -13,7 +13,7 @@ describe('UrlsController', () => {
       controllers: [UrlsController],
       providers: [
         {
-          provide: UrlsService,
+          provide: URLS_SERVICE,
           useValue: {},
         },
         JwtAuthGuard,
